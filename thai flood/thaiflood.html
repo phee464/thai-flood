@@ -1,0 +1,2711 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THAIFLOOD PRO ULTIMATE - Professional AI Flood Management System</title>
+    <meta name="description" content="ระบบจัดการน้ำท่วมระดับมืออาชีพด้วย AI, Machine Learning, QGIS และเทคโนโลยีล้ำสมัย">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0f1419">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon-192x192.png">
+    
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.10.0/tf.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+
+        :root[data-theme="dark"] {
+            --primary-bg: #0f1419;
+            --secondary-bg: #1a2332;
+            --accent-bg: #253448;
+            --card-bg: rgba(26, 35, 50, 0.9);
+            --glass-bg: rgba(37, 52, 72, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            
+            --primary-color: #00d4ff;
+            --secondary-color: #7c3aed;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #3b82f6;
+            
+            --text-primary: #ffffff;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --text-accent: #00d4ff;
+            
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            --glow-primary: 0 0 30px rgba(0, 212, 255, 0.3);
+            --glow-secondary: 0 0 25px rgba(124, 58, 237, 0.25);
+        }
+
+        :root[data-theme="light"] {
+            --primary-bg: #f8fafc;
+            --secondary-bg: #ffffff;
+            --accent-bg: #f1f5f9;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --glass-bg: rgba(255, 255, 255, 0.2);
+            --glass-border: rgba(0, 0, 0, 0.05);
+            
+            --primary-color: #0ea5e9;
+            --secondary-color: #8b5cf6;
+            --accent-color: #f59e0b;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --error-color: #dc2626;
+            --info-color: #2563eb;
+            
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --text-accent: #0ea5e9;
+            
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --glow-primary: 0 0 20px rgba(14, 165, 233, 0.2);
+            --glow-secondary: 0 0 15px rgba(139, 92, 246, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 50%, var(--accent-bg) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        body[lang="th"] {
+            font-family: 'Sarabun', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* Advanced Background Animation */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: 
+                radial-gradient(circle at 25% 25%, var(--primary-color) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, var(--secondary-color) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, var(--accent-color) 0%, transparent 50%);
+            animation: drift 180s linear infinite;
+            opacity: 0.03;
+        }
+
+        @keyframes drift {
+            0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+            25% { transform: translate(-50%, -50%) rotate(90deg) scale(1.1); }
+            50% { transform: translate(-50%, -50%) rotate(180deg) scale(0.9); }
+            75% { transform: translate(-50%, -50%) rotate(270deg) scale(1.05); }
+            100% { transform: translate(-50%, -50%) rotate(360deg) scale(1); }
+        }
+
+        /* Professional Header */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: var(--card-bg);
+            backdrop-filter: blur(25px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 1000;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+        }
+
+        .header-content {
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            align-items: center;
+            gap: 2rem;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            animation: logoGlow 3s ease-in-out infinite alternate;
+            box-shadow: var(--glow-primary);
+        }
+
+        @keyframes logoGlow {
+            from { box-shadow: var(--glow-primary); }
+            to { box-shadow: var(--glow-secondary); }
+        }
+
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+
+        .logo-text .subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .professional-badge {
+            background: linear-gradient(45deg, var(--accent-color), #fbbf24);
+            color: var(--primary-bg);
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Enhanced Navigation */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--glass-bg);
+            padding: 0.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.25rem;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.8rem;
+            font-weight: 600;
+            position: relative;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-1px);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            box-shadow: var(--glow-primary);
+            transform: translateY(-1px);
+        }
+
+        /* Advanced Status Panel */
+        .status-panel {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .lang-switcher {
+            display: flex;
+            background: var(--glass-bg);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            overflow: hidden;
+        }
+
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .lang-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .theme-toggle {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.5rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .ai-status {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .ai-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        /* Professional Main Layout */
+        .main-container {
+            margin-top: 100px;
+            padding: 2rem;
+            max-width: 1800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr 400px;
+            gap: 2rem;
+            min-height: calc(100vh - 120px);
+        }
+
+        /* Enhanced Glass Cards */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+            opacity: 0.6;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: var(--shadow-xl), var(--glow-primary);
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .card-header {
+            padding: 1.5rem 2rem 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-content {
+            padding: 2rem;
+        }
+
+        /* Professional QGIS Integration */
+        .qgis-panel {
+            background: linear-gradient(135deg, var(--card-bg), rgba(0, 212, 255, 0.02));
+            border: 2px solid var(--primary-color);
+            position: relative;
+        }
+
+        .qgis-panel::after {
+            content: 'QGIS LIVE';
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: linear-gradient(45deg, var(--primary-color), var(--info-color));
+            color: white;
+            padding: 0.25rem 1rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            box-shadow: var(--glow-primary);
+        }
+
+        .qgis-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .layer-controls {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .layer-btn {
+            padding: 0.4rem 0.8rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .layer-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .map-container {
+            height: 500px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid var(--glass-border);
+            position: relative;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem;
+            z-index: 1000;
+            max-width: 280px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.4rem;
+            font-size: 0.8rem;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        /* AI Analytics Dashboard */
+        .ai-dashboard {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .ai-model-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-model-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+        }
+
+        .model-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .model-name {
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .accuracy-badge {
+            background: var(--success-color);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .model-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .metric {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        .metric-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Real-time Visualization */
+        .realtime-viz {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .data-stream-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .data-stream-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+            animation: dataFlow 3s infinite;
+        }
+
+        @keyframes dataFlow {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .data-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin: 0.5rem 0;
+        }
+
+        .data-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Professional Charts */
+        .chart-container {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            height: 350px;
+            position: relative;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        /* Advanced Controls */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.4s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn-primary:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl), var(--glow-primary);
+        }
+
+        .btn-secondary {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        /* Weather Intelligence */
+        .weather-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            text-align: center;
+        }
+
+        .weather-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .temperature {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .weather-description {
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            text-align: left;
+        }
+
+        .weather-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            .dashboard-grid {
+                grid-template-columns: 300px 1fr 350px;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .header-content {
+                grid-template-columns: auto 1fr auto;
+                gap: 1rem;
+            }
+            
+            .nav-tabs {
+                order: 3;
+                grid-column: 1 / -1;
+                justify-self: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+                margin-top: 120px;
+            }
+            
+            .header-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 1rem;
+            }
+            
+            .nav-tabs {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .realtime-viz {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+
+        /* Enhanced Animations */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeInScale 0.5s ease-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--glass-bg);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+        }
+
+        /* Loading States */
+        .loading-skeleton {
+            background: linear-gradient(90deg, var(--glass-bg) 25%, rgba(255, 255, 255, 0.1) 50%, var(--glass-bg) 75%);
+            background-size: 200% 100%;
+            animation: loading-shimmer 2s infinite;
+        }
+
+        @keyframes loading-shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--glass-border);
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: 120px;
+            right: 20px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow-lg);
+            z-index: 1001;
+            animation: slideInRight 0.5s ease-out;
+            max-width: 400px;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .notification.success { border-left: 4px solid var(--success-color); }
+        .notification.warning { border-left: 4px solid var(--warning-color); }
+        .notification.error { border-left: 4px solid var(--error-color); }
+        .notification.info { border-left: 4px solid var(--info-color); }
+
+        /* Modal System */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* Professional Alert System */
+        .alert-panel {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .alert-item {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            position: relative;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--info-color);
+        }
+
+        .alert-item.critical {
+            border-left-color: var(--error-color);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .alert-item.warning {
+            border-left-color: var(--warning-color);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .alert-item.success {
+            border-left-color: var(--success-color);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .alert-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .alert-time {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .alert-description {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+        }
+
+        .alert-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .alert-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .alert-btn.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .alert-btn.secondary {
+            background: var(--glass-bg);
+            color: var(--text-secondary);
+            border: 1px solid var(--glass-border);
+        }
+    </style>
+</head>
+<body data-lang="th">
+    <!-- Advanced Background Animation -->
+    <div class="bg-animation"></div>
+    
+    <!-- Professional Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🌊</div>
+                <div class="logo-text">
+                    <h1 data-translate="title">THAIFLOOD PRO ULTIMATE</h1>
+                    <div class="subtitle">
+                        <span data-translate="subtitle">Professional AI Flood Management System</span>
+                        <span class="professional-badge">PROFESSIONAL</span>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="nav-tabs">
+                <button class="nav-tab active" onclick="switchTab('dashboard')" data-tab="dashboard">
+                    <span>🏠</span>
+                    <span data-translate="nav.dashboard">แดชบอร์ด</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('qgis')" data-tab="qgis">
+                    <span>🗺️</span>
+                    <span data-translate="nav.qgis">แผนที่ QGIS</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('ai')" data-tab="ai">
+                    <span>🧠</span>
+                    <span data-translate="nav.ai">AI Analytics</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('weather')" data-tab="weather">
+                    <span>🌤️</span>
+                    <span data-translate="nav.weather">สภาพอากาศ</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('alerts')" data-tab="alerts">
+                    <span>🚨</span>
+                    <span data-translate="nav.alerts">แจ้งเตือน</span>
+                </button>
+            </nav>
+            
+            <div class="status-panel">
+                <div class="lang-switcher">
+                    <button class="lang-btn active" onclick="switchLanguage('th')">TH</button>
+                    <button class="lang-btn" onclick="switchLanguage('en')">EN</button>
+                </div>
+                
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span id="themeIcon">🌙</span>
+                </button>
+                
+                <div class="ai-status">
+                    <div class="ai-indicator"></div>
+                    <span data-translate="status.ai">AI Active</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="main-container">
+        <div class="dashboard-grid" id="dashboardContent">
+            
+            <!-- Left Sidebar - AI Control Center -->
+            <div class="glass-card animate-slide-up">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span>🎛️</span>
+                        <span data-translate="sidebar.title">AI Control Center</span>
+                    </h3>
+                </div>
+                <div class="card-content">
+                    
+                    <!-- Real-time Data Streams -->
+                    <div class="realtime-viz">
+                        <div class="data-stream-card">
+                            <div class="data-value" id="satelliteData">98.7%</div>
+                            <div class="data-label" data-translate="data.satellite">Satellite Accuracy</div>
+                        </div>
+                        <div class="data-stream-card">
+                            <div class="data-value" id="sensorCount">1,247</div>
+                            <div class="data-label" data-translate="data.sensors">Active Sensors</div>
+                        </div>
+                        <div class="data-stream-card">
+                            <div class="data-value" id="aiConfidence">94.3%</div>
+                            <div class="data-label" data-translate="data.confidence">AI Confidence</div>
+                        </div>
+                        <div class="data-stream-card">
+                            <div class="data-value" id="responseTime">1.2s</div>
+                            <div class="data-label" data-translate="data.response">Response Time</div>
+                        </div>
+                    </div>
+
+                    <!-- AI Models Dashboard -->
+                    <div class="ai-dashboard">
+                        <div class="ai-model-card">
+                            <div class="model-header">
+                                <div class="model-name">
+                                    <span>🧠</span>
+                                    <span data-translate="model.lstm">LSTM Rainfall Predictor</span>
+                                </div>
+                                <div class="accuracy-badge">96.8%</div>
+                            </div>
+                            <div class="model-metrics">
+                                <div class="metric">
+                                    <div class="metric-value">72h</div>
+                                    <div class="metric-label" data-translate="metric.horizon">Horizon</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-value">847</div>
+                                    <div class="metric-label" data-translate="metric.sources">Sources</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ai-model-card">
+                            <div class="model-header">
+                                <div class="model-name">
+                                    <span>📡</span>
+                                    <span data-translate="model.cnn">CNN Satellite Analyzer</span>
+                                </div>
+                                <div class="accuracy-badge">94.2%</div>
+                            </div>
+                            <div class="model-metrics">
+                                <div class="metric">
+                                    <div class="metric-value">10m</div>
+                                    <div class="metric-label" data-translate="metric.resolution">Resolution</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-value">8min</div>
+                                    <div class="metric-label" data-translate="metric.latency">Latency</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ai-model-card">
+                            <div class="model-header">
+                                <div class="model-name">
+                                    <span>⚡</span>
+                                    <span data-translate="model.transformer">Weather Transformer</span>
+                                </div>
+                                <div class="accuracy-badge">91.5%</div>
+                            </div>
+                            <div class="model-metrics">
+                                <div class="metric">
+                                    <div class="metric-value">12</div>
+                                    <div class="metric-label" data-translate="metric.heads">Attention Heads</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-value">168h</div>
+                                    <div class="metric-label" data-translate="metric.sequence">Sequence</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div style="display: grid; gap: 1rem; margin-top: 2rem;">
+                        <button class="btn-primary" onclick="refreshAllData()">
+                            <span id="refreshBtn" data-translate="action.refresh">🔄 Refresh All Data</span>
+                        </button>
+                        <button class="btn-secondary" onclick="exportData()">
+                            <span data-translate="action.export">📊 Export Analytics</span>
+                        </button>
+                        <button class="btn-secondary" onclick="predictFlood()">
+                            <span data-translate="action.predict">🔮 Run Prediction</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center - Main QGIS Map -->
+            <div class="glass-card qgis-panel animate-fade-in">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span>🗺️</span>
+                        <span data-translate="qgis.title">QGIS Real-Time Flood Intelligence</span>
+                    </h2>
+                    <div class="qgis-controls">
+                        <div class="layer-controls">
+                            <button class="layer-btn active" data-layer="rainfall" onclick="toggleLayer(this, 'rainfall')">
+                                <span data-translate="layer.rainfall">ฝนตก</span>
+                            </button>
+                            <button class="layer-btn active" data-layer="waterlevel" onclick="toggleLayer(this, 'waterlevel')">
+                                <span data-translate="layer.water">น้ำท่วม</span>
+                            </button>
+                            <button class="layer-btn active" data-layer="risk" onclick="toggleLayer(this, 'risk')">
+                                <span data-translate="layer.risk">ความเสี่ยง</span>
+                            </button>
+                            <button class="layer-btn" data-layer="satellite" onclick="toggleLayer(this, 'satellite')">
+                                <span data-translate="layer.satellite">ดาวเทียม</span>
+                            </button>
+                            <button class="layer-btn active" data-layer="prediction" onclick="toggleLayer(this, 'prediction')">
+                                <span data-translate="layer.prediction">AI Prediction</span>
+                            </button>
+                        </div>
+                        <button class="btn-secondary" onclick="centerMap()">
+                            <span data-translate="map.center">📍 Center Map</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <div class="map-container" id="qgisMapContainer">
+                        <div class="map-overlay">
+                            <h5 style="color: var(--primary-color); margin-bottom: 1rem; font-weight: 700;">
+                                <span data-translate="legend.title">Live Data Layers</span>
+                            </h5>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: linear-gradient(45deg, #00ff00, #88ff00);"></div>
+                                <span data-translate="legend.rainfall">Rainfall Intensity (mm/h)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: linear-gradient(45deg, #0088ff, #00aaff);"></div>
+                                <span data-translate="legend.water">Water Level (MSL)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: linear-gradient(45deg, #ff4400, #ff6600);"></div>
+                                <span data-translate="legend.risk">Flood Risk Zones</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: linear-gradient(45deg, #8b5cf6, #a855f7);"></div>
+                                <span data-translate="legend.prediction">AI Prediction Layer</span>
+                            </div>
+                            
+                            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--glass-border);">
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">
+                                    <div><span data-translate="update.last">Last Update:</span></div>
+                                    <div id="lastUpdate" style="color: var(--primary-color); font-weight: 600;">Loading...</div>
+                                </div>
+                                <div style="margin-top: 0.5rem; font-size: 0.75rem;">
+                                    <div><span data-translate="update.next">Next Update:</span> <span style="color: var(--success-color);">2 min</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Analytics Charts -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h4 class="chart-title" data-translate="chart.rainfall">Rainfall Intensity Forecast</h4>
+                                <button class="btn-secondary" style="padding: 0.5rem; font-size: 0.7rem;" onclick="updateChart('rainfall')">🔄</button>
+                            </div>
+                            <canvas id="rainfallChart"></canvas>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h4 class="chart-title" data-translate="chart.prediction">AI Prediction Accuracy</h4>
+                                <button class="btn-secondary" style="padding: 0.5rem; font-size: 0.7rem;" onclick="updateChart('prediction')">🔄</button>
+                            </div>
+                            <canvas id="predictionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar - Weather & Alerts -->
+            <div style="display: grid; gap: 2rem;">
+                
+                <!-- Professional Weather Card -->
+                <div class="glass-card weather-card animate-slide-up">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <span>🌤️</span>
+                            <span data-translate="weather.title">Weather Intelligence</span>
+                        </h3>
+                        <button class="btn-secondary" onclick="updateWeather()" style="padding: 0.5rem 1rem; font-size: 0.8rem;">
+                            <span data-translate="weather.update">🔄 Update</span>
+                        </button>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div style="text-align: center; margin-bottom: 2rem;">
+                            <div class="weather-icon" id="weatherIcon">⛈️</div>
+                            <div class="temperature" id="temperature">29°C</div>
+                            <div class="weather-description" id="weatherDesc" data-translate="weather.severe">Severe Thunderstorm</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);" data-translate="weather.location">Bangkok Metropolitan</div>
+                        </div>
+                        
+                        <div class="weather-details">
+                            <div class="weather-detail">
+                                <span>💨</span>
+                                <span data-translate="weather.wind">Wind:</span>
+                                <span id="windSpeed">45 km/h</span>
+                            </div>
+                            <div class="weather-detail">
+                                <span>💧</span>
+                                <span data-translate="weather.humidity">Humidity:</span>
+                                <span id="humidity">89%</span>
+                            </div>
+                            <div class="weather-detail">
+                                <span>🌧️</span>
+                                <span data-translate="weather.rainfall">Rainfall:</span>
+                                <span id="rainfall">73 mm/h</span>
+                            </div>
+                            <div class="weather-detail">
+                                <span>📊</span>
+                                <span data-translate="weather.pressure">Pressure:</span>
+                                <span id="pressure">1012 hPa</span>
+                            </div>
+                        </div>
+
+                        <!-- AI Weather Analysis -->
+                        <div style="margin-top: 2rem; padding: 1.5rem; background: var(--glass-bg); border-radius: 12px; border: 1px solid var(--glass-border);">
+                            <h5 style="color: var(--primary-color); margin-bottom: 1rem; font-weight: 700;">
+                                <span>🧠</span>
+                                <span data-translate="weather.ai">AI Analysis</span>
+                            </h5>
+                            <div style="display: grid; gap: 0.75rem; font-size: 0.85rem;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span data-translate="weather.forecast">24h Forecast:</span>
+                                    <span style="color: var(--warning-color); font-weight: 600;">127.3mm</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span data-translate="weather.risk">Risk Score:</span>
+                                    <span style="color: var(--error-color); font-weight: 600;">8.7/10</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span data-translate="weather.confidence">Confidence:</span>
+                                    <span style="color: var(--success-color); font-weight: 600;">94.7%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Alerts Panel -->
+                <div class="glass-card animate-fade-in">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <span>🚨</span>
+                            <span data-translate="alerts.title">Live Intelligence Alerts</span>
+                        </h3>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn-secondary" onclick="clearAlerts()" style="padding: 0.5rem; font-size: 0.7rem;">
+                                <span data-translate="alerts.clear">🗑️ Clear</span>
+                            </button>
+                            <div class="spinner" id="alertLoader" style="display: none;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="alert-panel" id="liveAlerts">
+                            <div class="alert-item critical">
+                                <div class="alert-header">
+                                    <div class="alert-title">🌊 AI CRITICAL - Bangkok Metropolitan</div>
+                                    <div class="alert-time">16:42</div>
+                                </div>
+                                <div class="alert-description" data-translate="alert.critical.desc">
+                                    Neural networks detect 89% probability of severe flooding in next 4 hours. Satellite imagery confirms storm system approaching.
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                                    <span data-translate="alert.confidence">🧠 AI Confidence: 94.7%</span> |
+                                    <span data-translate="alert.sources">📡 Sources: 847 sensors</span>
+                                </div>
+                                <div class="alert-actions">
+                                    <button class="alert-btn primary" onclick="viewAlertDetails('CRIT-001')">
+                                        <span data-translate="alert.view">View Details</span>
+                                    </button>
+                                    <button class="alert-btn secondary" onclick="shareAlert('CRIT-001')">
+                                        <span data-translate="alert.share">📤 Share</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="alert-item warning">
+                                <div class="alert-header">
+                                    <div class="alert-title">⛈️ WEATHER ALERT - Pathum Thani</div>
+                                    <div class="alert-time">15:58</div>
+                                </div>
+                                <div class="alert-description" data-translate="alert.weather.desc">
+                                    Severe thunderstorm detected moving northeast at 35 km/h. Expected rainfall: 80-120mm in next 3 hours.
+                                </div>
+                                <div class="alert-actions">
+                                    <button class="alert-btn primary" onclick="viewAlertDetails('WARN-001')">
+                                        <span data-translate="alert.view">View Details</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="alert-item success">
+                                <div class="alert-header">
+                                    <div class="alert-title">📊 DATA UPDATE - Satellite Refresh</div>
+                                    <div class="alert-time">14:35</div>
+                                </div>
+                                <div class="alert-description" data-translate="alert.data.desc">
+                                    High-resolution satellite imagery updated. New precipitation patterns detected over Chao Phraya basin.
+                                </div>
+                                <div class="alert-actions">
+                                    <button class="alert-btn secondary" onclick="acknowledgeAlert('INFO-001')">
+                                        <span data-translate="alert.acknowledge">✓ Acknowledge</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Status -->
+                <div class="glass-card animate-slide-up">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <span>⚙️</span>
+                            <span data-translate="system.title">System Status</span>
+                        </h3>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div style="display: grid; gap: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--glass-bg); border-radius: 8px;">
+                                <span data-translate="system.api">API Latency</span>
+                                <span style="color: var(--success-color); font-weight: 600;">47ms</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--glass-bg); border-radius: 8px;">
+                                <span data-translate="system.memory">Memory Usage</span>
+                                <span style="color: var(--info-color); font-weight: 600;">68% (24GB)</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--glass-bg); border-radius: 8px;">
+                                <span data-translate="system.cpu">CPU Load</span>
+                                <span style="color: var(--warning-color); font-weight: 600;">78% (32 cores)</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--glass-bg); border-radius: 8px;">
+                                <span data-translate="system.uptime">Uptime</span>
+                                <span style="color: var(--success-color); font-weight: 600;">99.97%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Professional AI Flood Management System
+        class ThaiFloodProUltimate {
+
+            
+            constructor() {
+                this.currentLang = 'th';
+                this.currentTheme = 'dark';
+                this.map = null;
+                this.charts = {};
+                this.layers = {
+                    rainfall: true,
+                    waterlevel: true,
+                    risk: true,
+                    satellite: false,
+                    prediction: true
+                };
+                this.aiModels = {
+                    lstm: { accuracy: 96.8, status: 'active' },
+                    cnn: { accuracy: 94.2, status: 'active' },
+                    transformer: { accuracy: 91.5, status: 'active' }
+                };
+                this.weatherData = {
+                    temperature: 29,
+                    condition: 'thunderstorm',
+                    wind: 45,
+                    humidity: 89,
+                    rainfall: 73,
+                    pressure: 1012
+                };
+                
+                this.init();
+            }
+
+            async init() {
+                console.log('🚀 Initializing ThaiFlood Pro Ultimate...');
+                await this.initializeTranslations();
+                await this.initializeQGISMap();
+                await this.initializeCharts();
+                await this.startRealTimeUpdates();
+                await this.setupEventListeners();
+                console.log('✅ System Ready - Professional Mode Active');
+                this.showNotification(this.t('system.ready'), 'success');
+
+            }
+
+            // Internationalization System
+            translations = {
+                th: {
+                    'title': 'THAIFLOOD PRO ULTIMATE',
+                    'subtitle': 'ระบบจัดการน้ำท่วมระดับมืออาชีพ',
+                    'nav.dashboard': 'แดชบอร์ด',
+                    'nav.qgis': 'แผนที่ QGIS',
+                    'nav.ai': 'AI Analytics',
+                    'nav.weather': 'สภาพอากาศ',
+                    'nav.alerts': 'แจ้งเตือน',
+                    'status.ai': 'AI ทำงาน',
+                    'sidebar.title': 'AI Control Center',
+                    'data.satellite': 'ความแม่นยำดาวเทียม',
+                    'data.sensors': 'เซนเซอร์ที่ใช้งาน',
+                    'data.confidence': 'ความเชื่อมั่น AI',
+                    'data.response': 'เวลาตอบสนอง',
+                    'model.lstm': 'LSTM Rainfall Predictor',
+                    'model.cnn': 'CNN Satellite Analyzer', 
+                    'model.transformer': 'Weather Transformer',
+                    'metric.horizon': 'ช่วงเวลา',
+                    'metric.sources': 'แหล่งข้อมูล',
+                    'metric.resolution': 'ความละเอียด',
+                    'metric.latency': 'ความหน่วง',
+                    'metric.heads': 'Attention Heads',
+                    'metric.sequence': 'ลำดับ',
+                    'action.refresh': '🔄 รีเฟรชข้อมูล',
+                    'action.export': '📊 ส่งออกข้อมูล',
+                    'action.predict': '🔮 รันการพยากรณ์',
+                    'qgis.title': 'QGIS Real-Time Flood Intelligence',
+                    'layer.rainfall': 'ฝนตก',
+                    'layer.water': 'ระดับน้ำ',
+                    'layer.risk': 'ความเสี่ยง',
+                    'layer.satellite': 'ดาวเทียม',
+                    'layer.prediction': 'AI Prediction',
+                    'map.center': '📍 กลางแผนที่',
+                    'legend.title': 'ชั้นข้อมูลสด',
+                    'legend.rainfall': 'ความเข้มฝน (mm/h)',
+                    'legend.water': 'ระดับน้ำ (MSL)',
+                    'legend.risk': 'โซนความเสี่ยงน้ำท่วม',
+                    'legend.prediction': 'ชั้นข้อมูล AI Prediction',
+                    'update.last': 'อัปเดตล่าสุด:',
+                    'update.next': 'อัปเดตถัดไป:',
+                    'chart.rainfall': 'พยากรณ์ความเข้มฝน',
+                    'chart.prediction': 'ความแม่นยำ AI Prediction',
+                    'weather.title': 'Weather Intelligence',
+                    'weather.update': '🔄 อัปเดต',
+                    'weather.severe': 'พายุฝนฟ้าคะนองรุนแรง',
+                    'weather.location': 'กรุงเทพมหานคร',
+                    'weather.wind': 'ลม:',
+                    'weather.humidity': 'ความชื้น:',
+                    'weather.rainfall': 'ฝน:',
+                    'weather.pressure': 'ความกดอากาศ:',
+                    'weather.ai': 'การวิเคราะห์ AI',
+                    'weather.forecast': 'พยากรณ์ 24 ชม.:',
+                    'weather.risk': 'คะแนนความเสี่ยง:',
+                    'weather.confidence': 'ความเชื่อมั่น:',
+                    'alerts.title': 'การแจ้งเตือนสดจาก AI',
+                    'alerts.clear': '🗑️ ล้าง',
+                    'alert.critical.desc': 'โครงข่ายประสาทเทียมตรวจพบความน่าจะเป็น 89% ของน้ำท่วมรุนแรงในอีก 4 ชั่วโมงข้างหน้า ภาพดาวเทียมยืนยันระบบพายุกำลังเข้าใกล้',
+                    'alert.weather.desc': 'ตรวจพบพายุฝนฟ้าคะนองรุนแรงเคลื่อนตัวไปทางตะวันออกเฉียงเหนือด้วยความเร็ว 35 กม./ชม. คาดว่าจะมีฝนตก: 80-120 มม. ในอีก 3 ชั่วโมงข้างหน้า',
+                    'alert.data.desc': 'อัปเดตภาพดาวเทียมความละเอียดสูงแล้ว ตรวจพบรูปแบบฝนใหม่เหนืออ่าวเจ้าพระยา',
+                    'alert.confidence': '🧠 ความเชื่อมั่น AI: 94.7%',
+                    'alert.sources': '📡 แหล่งข้อมูล: 847 เซนเซอร์',
+                    'alert.view': 'ดูรายละเอียด',
+                    'alert.share': '📤 แชร์',
+                    'alert.acknowledge': '✓ รับทราบ',
+                    'system.title': 'สถานะระบบ',
+                    'system.api': 'ความหน่วง API',
+                    'system.memory': 'การใช้หน่วยความจำ',
+                    'system.cpu': 'โหลด CPU',
+                    'system.uptime': 'เวลาทำงาน',
+                    'system.ready': 'ระบบพร้อมใช้งาน - โหมดมืออาชีพเปิดใช้งาน',
+                    'notification.refreshed': 'รีเฟรชข้อมูลสำเร็จ',
+                    'notification.exported': 'ส่งออกข้อมูลสำเร็จ',
+                    'notification.predicted': 'รันการพยากรณ์สำเร็จ',
+                    'notification.weather_updated': 'อัปเดตข้อมูลสภาพอากาศแล้ว',
+                    'notification.layer_toggled': 'สลับชั้นข้อมูล',
+                    'notification.map_centered': 'แผนที่อยู่ตรงกลางแล้ว',
+                    'notification.alerts_cleared': 'ล้างการแจ้งเตือนแล้ว',
+                    'notification.alert_shared': 'แชร์การแจ้งเตือนแล้ว',
+                    'notification.alert_acknowledged': 'รับทราบการแจ้งเตือนแล้ว'
+                },
+                en: {
+                    'title': 'THAIFLOOD PRO ULTIMATE',
+                    'subtitle': 'Professional AI Flood Management System',
+                    'nav.dashboard': 'Dashboard',
+                    'nav.qgis': 'QGIS Map',
+                    'nav.ai': 'AI Analytics',
+                    'nav.weather': 'Weather',
+                    'nav.alerts': 'Alerts',
+                    'status.ai': 'AI Active',
+                    'sidebar.title': 'AI Control Center',
+                    'data.satellite': 'Satellite Accuracy',
+                    'data.sensors': 'Active Sensors',
+                    'data.confidence': 'AI Confidence',
+                    'data.response': 'Response Time',
+                    'model.lstm': 'LSTM Rainfall Predictor',
+                    'model.cnn': 'CNN Satellite Analyzer',
+                    'model.transformer': 'Weather Transformer',
+                    'metric.horizon': 'Horizon',
+                    'metric.sources': 'Sources',
+                    'metric.resolution': 'Resolution',
+                    'metric.latency': 'Latency',
+                    'metric.heads': 'Attention Heads',
+                    'metric.sequence': 'Sequence',
+                    'action.refresh': '🔄 Refresh All Data',
+                    'action.export': '📊 Export Analytics',
+                    'action.predict': '🔮 Run Prediction',
+                    'qgis.title': 'QGIS Real-Time Flood Intelligence',
+                    'layer.rainfall': 'Rainfall',
+                    'layer.water': 'Water Level',
+                    'layer.risk': 'Risk Zones',
+                    'layer.satellite': 'Satellite',
+                    'layer.prediction': 'AI Prediction',
+                    'map.center': '📍 Center Map',
+                    'legend.title': 'Live Data Layers',
+                    'legend.rainfall': 'Rainfall Intensity (mm/h)',
+                    'legend.water': 'Water Level (MSL)',
+                    'legend.risk': 'Flood Risk Zones',
+                    'legend.prediction': 'AI Prediction Layer',
+                    'update.last': 'Last Update:',
+                    'update.next': 'Next Update:',
+                    'chart.rainfall': 'Rainfall Intensity Forecast',
+                    'chart.prediction': 'AI Prediction Accuracy',
+                    'weather.title': 'Weather Intelligence',
+                    'weather.update': '🔄 Update',
+                    'weather.severe': 'Severe Thunderstorm',
+                    'weather.location': 'Bangkok Metropolitan',
+                    'weather.wind': 'Wind:',
+                    'weather.humidity': 'Humidity:',
+                    'weather.rainfall': 'Rainfall:',
+                    'weather.pressure': 'Pressure:',
+                    'weather.ai': 'AI Analysis',
+                    'weather.forecast': '24h Forecast:',
+                    'weather.risk': 'Risk Score:',
+                    'weather.confidence': 'Confidence:',
+                    'alerts.title': 'Live Intelligence Alerts',
+                    'alerts.clear': '🗑️ Clear',
+                    'alert.critical.desc': 'Neural networks detect 89% probability of severe flooding in next 4 hours. Satellite imagery confirms storm system approaching.',
+                    'alert.weather.desc': 'Severe thunderstorm detected moving northeast at 35 km/h. Expected rainfall: 80-120mm in next 3 hours.',
+                    'alert.data.desc': 'High-resolution satellite imagery updated. New precipitation patterns detected over Chao Phraya basin.',
+                    'alert.confidence': '🧠 AI Confidence: 94.7%',
+                    'alert.sources': '📡 Sources: 847 sensors',
+                    'alert.view': 'View Details',
+                    'alert.share': '📤 Share',
+                    'alert.acknowledge': '✓ Acknowledge',
+                    'system.title': 'System Status',
+                    'system.api': 'API Latency',
+                    'system.memory': 'Memory Usage',
+                    'system.cpu': 'CPU Load',
+                    'system.uptime': 'Uptime',
+                    'system.ready': 'System Ready - Professional Mode Active',
+                    'notification.refreshed': 'Data refreshed successfully',
+                    'notification.exported': 'Data exported successfully',
+                    'notification.predicted': 'Prediction completed successfully',
+                    'notification.weather_updated': 'Weather data updated',
+                    'notification.layer_toggled': 'Layer toggled',
+                    'notification.map_centered': 'Map centered',
+                    'notification.alerts_cleared': 'Alerts cleared',
+                    'notification.alert_shared': 'Alert shared',
+                    'notification.alert_acknowledged': 'Alert acknowledged'
+                }
+            };
+
+            async initializeTranslations() {
+                this.updateLanguage();
+            }
+
+            t(key) {
+                return this.translations[this.currentLang][key] || key;
+            }
+
+            updateLanguage() {
+                document.body.setAttribute('data-lang', this.currentLang);
+                document.body.lang = this.currentLang;
+                
+                // Update all translatable elements
+                document.querySelectorAll('[data-translate]').forEach(element => {
+                    const key = element.getAttribute('data-translate');
+                    element.textContent = this.t(key);
+                });
+            }
+
+            async initializeQGISMap() {
+                const mapContainer = document.getElementById('qgisMapContainer');
+                
+                // Initialize professional map with dark theme
+                this.map = L.map(mapContainer, {
+                    zoomControl: true,
+                    attributionControl: false
+                }).setView([14.0583, 100.6014], 10);
+                
+                // Add professional base layer
+                const baseLayer = this.currentTheme === 'dark' 
+                    ? L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                        attribution: '© CARTO © OpenStreetMap contributors',
+                        maxZoom: 20
+                    })
+                    : L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                        attribution: '© CARTO © OpenStreetMap contributors',
+                        maxZoom: 20
+                    });
+                
+                baseLayer.addTo(this.map);
+                
+                // Initialize all data layers
+                await this.initializeMapLayers();
+                
+                // Update timestamp
+                this.updateMapTimestamp();
+            }
+
+            async initializeMapLayers() {
+                // Professional rainfall intensity layer
+                if (this.layers.rainfall) {
+                    this.addRainfallLayer();
+                }
+                
+                // Water level monitoring points
+                if (this.layers.waterlevel) {
+                    this.addWaterLevelLayer();
+                }
+                
+                // Risk zones
+                if (this.layers.risk) {
+                    this.addRiskZonesLayer();
+                }
+                
+                // AI prediction overlay
+                if (this.layers.prediction) {
+                    this.addAIPredictionLayer();
+                }
+            }
+
+            addRainfallLayer() {
+                // Generate realistic rainfall data for Thailand
+                const rainfallData = this.generateRainfallData();
+                
+                rainfallData.forEach(point => {
+                    const intensity = point.intensity;
+                    const color = this.getRainfallColor(intensity);
+                    const radius = Math.max(100, intensity * 15);
+                    
+                    L.circle([point.lat, point.lng], {
+                        radius: radius,
+                        color: color,
+                        fillColor: color,
+                        fillOpacity: 0.6,
+                        weight: 2,
+                        className: 'rainfall-marker'
+                    }).addTo(this.map)
+                    .bindPopup(`
+                        <div style="color: var(--text-primary); background: var(--card-bg); padding: 1rem; border-radius: 8px; min-width: 200px;">
+                            <h5 style="margin-bottom: 0.5rem; color: var(--primary-color);">🌧️ Rainfall Data</h5>
+                            <div style="margin-bottom: 0.5rem;"><strong>Intensity:</strong> ${intensity} mm/h</div>
+                            <div style="margin-bottom: 0.5rem;"><strong>Location:</strong> ${point.lat.toFixed(4)}, ${point.lng.toFixed(4)}</div>
+                            <div style="margin-bottom: 0.5rem;"><strong>Time:</strong> ${new Date().toLocaleTimeString()}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">AI Confidence: 96.8%</div>
+                        </div>
+                    `);
+                });
+            }
+
+            generateRainfallData() {
+                const points = [];
+                const centers = [
+                    { lat: 13.7563, lng: 100.5018, name: 'Bangkok' },
+                    { lat: 14.0298, lng: 100.6085, name: 'Rangsit' },
+                    { lat: 13.8842, lng: 100.4164, name: 'Bang Yai' },
+                    { lat: 14.2291, lng: 100.5664, name: 'Bang Pa-in' },
+                    { lat: 13.6132, lng: 100.6067, name: 'Samut Prakan' }
+                ];
+                
+                centers.forEach(center => {
+                    // Generate cluster around each center
+                    for (let i = 0; i < 15; i++) {
+                        const angle = (Math.PI * 2 * i) / 15;
+                        const distance = Math.random() * 0.5; // Adjust cluster size
+                        
+                        points.push({
+                            lat: center.lat + Math.cos(angle) * distance + (Math.random() - 0.5) * 0.2,
+                            lng: center.lng + Math.sin(angle) * distance + (Math.random() - 0.5) * 0.2,
+                            intensity: Math.random() * 100 + 10, // 10-110 mm/h
+                            location: center.name
+                        });
+                    }
+                });
+                
+                return points;
+            }
+
+            getRainfallColor(intensity) {
+                if (intensity > 80) return '#ff0000'; // Heavy (Red)
+                if (intensity > 50) return '#ff8800'; // Moderate-Heavy (Orange)
+                if (intensity > 25) return '#ffdd00'; // Moderate (Yellow)
+                if (intensity > 10) return '#88ff00'; // Light (Light Green)
+                return '#00ff00'; // Very Light (Green)
+            }
+
+            addWaterLevelLayer() {
+                const waterPoints = [
+                    { lat: 13.7563, lng: 100.5018, level: 2.8, name: 'Chao Phraya @ Bangkok', status: 'critical' },
+                    { lat: 14.0298, lng: 100.6085, level: 2.1, name: 'Rangsit Canal', status: 'warning' },
+                    { lat: 13.8842, lng: 100.4164, level: 1.5, name: 'Bang Yai Station', status: 'normal' },
+                    { lat: 14.2291, lng: 100.5664, level: 2.4, name: 'Bang Pa-in', status: 'warning' },
+                    { lat: 13.6132, lng: 100.6067, level: 3.1, name: 'Samut Prakan', status: 'critical' }
+                ];
+
+                waterPoints.forEach(point => {
+                    const color = point.status === 'critical' ? '#ff3366' : 
+                                 point.status === 'warning' ? '#ffaa00' : '#00cc88';
+                    
+                    L.marker([point.lat, point.lng], {
+                        icon: L.divIcon({
+                            className: 'water-level-marker',
+                            html: `<div style="
+                                background: ${color};
+                                width: 24px;
+                                height: 24px;
+                                border-radius: 50%;
+                                border: 3px solid white;
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                color: white;
+                                font-size: 10px;
+                                font-weight: bold;
+                            ">${point.level}m</div>`,
+                            iconSize: [24, 24]
+                        })
+                    }).addTo(this.map)
+                    .bindPopup(`
+                        <div style="color: var(--text-primary); background: var(--card-bg); padding: 1rem; border-radius: 8px; min-width: 200px;">
+                            <h5 style="margin-bottom: 0.5rem; color: var(--primary-color);">💧 ${point.name}</h5>
+                            <div style="margin-bottom: 0.5rem;"><strong>Water Level:</strong> ${point.level}m MSL</div>
+                            <div style="margin-bottom: 0.5rem;"><strong>Status:</strong> 
+                                <span style="color: ${color}; font-weight: bold; text-transform: uppercase;">${point.status}</span>
+                            </div>
+                            <div style="margin-bottom: 0.5rem;"><strong>Trend:</strong> ${point.level > 2.5 ? '↗️ Rising' : '↘️ Stable'}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Last Update: ${new Date().toLocaleTimeString()}</div>
+                        </div>
+                    `);
+                });
+            }
+
+            addRiskZonesLayer() {
+                const riskZones = [
+                    { 
+                        bounds: [[13.65, 100.45], [13.85, 100.65]], 
+                        risk: 'high', 
+                        name: 'Bangkok Metropolitan',
+                        population: 8500000
+                    },
+                    { 
+                        bounds: [[13.95, 100.55], [14.15, 100.75]], 
+                        risk: 'medium', 
+                        name: 'Pathum Thani Province',
+                        population: 1200000
+                    },
+                    { 
+                        bounds: [[13.80, 100.35], [14.00, 100.55]], 
+                        risk: 'low', 
+                        name: 'Nonthaburi Province',
+                        population: 1300000
+                    }
+                ];
+
+                riskZones.forEach(zone => {
+                    const colors = { 
+                        high: { color: '#ff4400', opacity: 0.4 }, 
+                        medium: { color: '#ffaa00', opacity: 0.3 }, 
+                        low: { color: '#44ff44', opacity: 0.2 }
+                    };
+                    
+                    const zoneColor = colors[zone.risk];
+                    
+                    L.rectangle(zone.bounds, {
+                        color: zoneColor.color,
+                        fillColor: zoneColor.color,
+                        fillOpacity: zoneColor.opacity,
+                        weight: 2,
+                        dashArray: '5, 10'
+                    }).addTo(this.map)
+                    .bindPopup(`
+                        <div style="color: var(--text-primary); background: var(--card-bg); padding: 1rem; border-radius: 8px; min-width: 250px;">
+                            <h5 style="margin-bottom: 0.5rem; color: var(--primary-color);">⚠️ ${zone.name}</h5>
+                            <div style="margin-bottom: 0.5rem;"><strong>Risk Level:</strong> 
+                                <span style="color: ${zoneColor.color}; font-weight: bold; text-transform: uppercase;">${zone.risk}</span>
+                            </div>
+                            <div style="margin-bottom: 0.5rem;"><strong>Population:</strong> ${zone.population.toLocaleString()}</div>
+                            <div style="margin-bottom: 0.5rem;"><strong>AI Confidence:</strong> ${85 + Math.random() * 10}%</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Based on multi-source analysis</div>
+                        </div>
+                    `);
+                });
+            }
+
+            addAIPredictionLayer() {
+                const predictionData = this.generateAIPredictionData();
+                
+                predictionData.forEach(point => {
+                    L.circle([point.lat, point.lng], {
+                        radius: point.confidence * 800,
+                        color: '#8b5cf6',
+                        fillColor: '#a855f7',
+                        fillOpacity: 0.3,
+                        weight: 2,
+                        dashArray: '8, 12',
+                        className: 'ai-prediction-marker'
+                    }).addTo(this.map)
+                    .bindPopup(`
+                        <div style="color: var(--text-primary); background: var(--card-bg); padding: 1rem; border-radius: 8px; min-width: 200px;">
+                            <h5 style="margin-bottom: 0.5rem; color: var(--secondary-color);">🧠 AI Flood Prediction</h5>
+                            <div style="margin-bottom: 0.5rem;"><strong>Probability:</strong> ${(point.confidence * 100).toFixed(1)}%</div>
+                            <div style="margin-bottom: 0.5rem;"><strong>Model:</strong> ${point.model}</div>
+                            <div style="margin-bottom: 0.5rem;"><strong>Time Horizon:</strong> ${point.horizon}h</div>
+                            <div style="margin-bottom: 0.5rem;"><strong>Severity:</strong> ${point.severity}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Neural Network Analysis</div>
+                        </div>
+                    `);
+                });
+            }
+
+            generateAIPredictionData() {
+                const models = ['LSTM', 'CNN', 'Transformer', 'Ensemble'];
+                const severities = ['Low', 'Medium', 'High', 'Critical'];
+                const points = [];
+                
+                for (let i = 0; i < 25; i++) {
+                    points.push({
+                        lat: 14.0583 + (Math.random() - 0.5) * 1.2,
+                        lng: 100.6014 + (Math.random() - 0.5) * 1.2,
+                        confidence: Math.random() * 0.6 + 0.4, // 40-100%
+                        model: models[Math.floor(Math.random() * models.length)],
+                        horizon: Math.floor(Math.random() * 48) + 6, // 6-54 hours
+                        severity: severities[Math.floor(Math.random() * severities.length)]
+                    });
+                }
+                return points;
+            }
+
+            async initializeCharts() {
+                await this.createRainfallChart();
+                await this.createPredictionChart();
+            }
+
+            async createRainfallChart() {
+                const ctx = document.getElementById('rainfallChart')?.getContext('2d');
+                if (!ctx) return;
+
+                const hours = Array.from({length: 24}, (_, i) => {
+                    const hour = new Date();
+                    hour.setHours(hour.getHours() + i);
+                    return hour.toLocaleTimeString('th-TH', {hour: '2-digit', minute: '2-digit'});
+                });
+
+                const rainfallData = Array.from({length: 24}, () => Math.random() * 120 + 10);
+
+                this.charts.rainfall = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: hours,
+                        datasets: [{
+                            label: this.t('chart.rainfall'),
+                            data: rainfallData,
+                            borderColor: '#00d4ff',
+                            backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: 'var(--text-primary)' }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                ticks: { color: 'var(--text-secondary)' }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                ticks: { color: 'var(--text-secondary)' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            async createPredictionChart() {
+                const ctx = document.getElementById('predictionChart')?.getContext('2d');
+                if (!ctx) return;
+
+                const models = ['LSTM', 'CNN', 'Transformer', 'Ensemble'];
+                const accuracies = [96.8, 94.2, 91.5, 97.3];
+
+                this.charts.prediction = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: models,
+                        datasets: [{
+                            data: accuracies,
+                            backgroundColor: [
+                                '#00d4ff',
+                                '#7c3aed', 
+                                '#f59e0b',
+                                '#10b981'
+                            ],
+                            borderWidth: 0,
+                            cutout: '60%'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { 
+                                    color: 'var(--text-primary)',
+                                    padding: 20
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            updateMapTimestamp() {
+                const updateElement = document.getElementById('lastUpdate');
+                if (updateElement) {
+                    updateElement.textContent = new Date().toLocaleString(this.currentLang === 'th' ? 'th-TH' : 'en-US');
+                }
+            }
+
+            startRealTimeUpdates() {
+                // Update sensor data every 30 seconds
+                setInterval(() => {
+                    this.updateSensorData();
+                }, 30000);
+
+                // Update weather every 2 minutes
+                setInterval(() => {
+                    this.updateWeatherData();
+                }, 120000);
+
+                // Update map timestamp every minute
+                setInterval(() => {
+                    this.updateMapTimestamp();
+                }, 60000);
+
+                // Update AI metrics every 10 seconds
+                setInterval(() => {
+                    this.updateAIMetrics();
+                }, 10000);
+            }
+
+            updateSensorData() {
+                // Update satellite accuracy
+                const satelliteEl = document.getElementById('satelliteData');
+                if (satelliteEl) {
+                    const newValue = (Math.random() * 4 + 96).toFixed(1) + '%';
+                    satelliteEl.textContent = newValue;
+                }
+
+                // Update sensor count
+                const sensorEl = document.getElementById('sensorCount');
+                if (sensorEl) {
+                    const newCount = Math.floor(Math.random() * 50) + 1200;
+                    sensorEl.textContent = newCount.toLocaleString();
+                }
+
+                // Update AI confidence
+                const confidenceEl = document.getElementById('aiConfidence');
+                if (confidenceEl) {
+                    const newConfidence = (Math.random() * 8 + 92).toFixed(1) + '%';
+                    confidenceEl.textContent = newConfidence;
+                }
+
+                // Update response time
+                const responseEl = document.getElementById('responseTime');
+                if (responseEl) {
+                    const newTime = (Math.random() * 0.8 + 0.8).toFixed(1) + 's';
+                    responseEl.textContent = newTime;
+                }
+            }
+
+            updateWeatherData() {
+                // Simulate weather changes
+                this.weatherData.temperature += (Math.random() - 0.5) * 2;
+                this.weatherData.wind += (Math.random() - 0.5) * 5;
+                this.weatherData.humidity += (Math.random() - 0.5) * 3;
+                this.weatherData.rainfall += (Math.random() - 0.5) * 10;
+                this.weatherData.pressure += (Math.random() - 0.5) * 5;
+
+                // Update UI
+                document.getElementById('temperature').textContent = Math.round(this.weatherData.temperature) + '°C';
+                document.getElementById('windSpeed').textContent = Math.round(this.weatherData.wind) + ' km/h';
+                document.getElementById('humidity').textContent = Math.round(this.weatherData.humidity) + '%';
+                document.getElementById('rainfall').textContent = Math.round(this.weatherData.rainfall) + ' mm/h';
+                document.getElementById('pressure').textContent = Math.round(this.weatherData.pressure) + ' hPa';
+            }
+
+            updateAIMetrics() {
+                // Simulate small fluctuations in AI model performance
+                Object.keys(this.aiModels).forEach(model => {
+                    this.aiModels[model].accuracy += (Math.random() - 0.5) * 0.1;
+                    // Keep within reasonable bounds
+                    if (this.aiModels[model].accuracy > 98) this.aiModels[model].accuracy = 98;
+                    if (this.aiModels[model].accuracy < 85) this.aiModels[model].accuracy = 85;
+                });
+            }
+
+            setupEventListeners() {
+                // Enhanced keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey || e.metaKey) {
+                        switch(e.key) {
+                            case 'r':
+                                e.preventDefault();
+                                this.refreshAllData();
+                                break;
+                            case 'e':
+                                e.preventDefault();
+                                this.exportData();
+                                break;
+                            case 'p':
+                                e.preventDefault();
+                                this.predictFlood();
+                                break;
+                            case 'u':
+                                e.preventDefault();
+                                this.updateWeather();
+                                break;
+                            case 'l':
+                                e.preventDefault();
+                                this.switchLanguage(this.currentLang === 'th' ? 'en' : 'th');
+                                break;
+                            case 't':
+                                e.preventDefault();
+                                this.toggleTheme();
+                                break;
+                        }
+                    }
+                });
+
+                // Window resize handler
+                window.addEventListener('resize', () => {
+                    if (this.map) {
+                        setTimeout(() => {
+                            this.map.invalidateSize();
+                        }, 100);
+                    }
+                });
+
+                // Theme change detection
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                    if (this.currentTheme === 'auto') {
+                        this.applyTheme(e.matches ? 'dark' : 'light');
+                    }
+                });
+            }
+
+            // Public Methods for UI Interactions
+            refreshAllData() {
+                const btn = document.getElementById('refreshBtn');
+                const spinner = document.createElement('div');
+                spinner.className = 'spinner';
+                spinner.style.display = 'inline-block';
+                spinner.style.marginRight = '0.5rem';
+                
+                btn.innerHTML = '';
+                btn.appendChild(spinner);
+                btn.appendChild(document.createTextNode(this.t('action.refresh')));
+                btn.disabled = true;
+
+                Promise.all([
+                    this.updateSensorData(),
+                    this.updateWeatherData(),
+                    this.updateAIMetrics(),
+                    this.updateMapTimestamp(),
+                    this.refreshMapLayers()
+                ]).then(() => {
+                    setTimeout(() => {
+                        btn.innerHTML = this.t('action.refresh');
+                        btn.disabled = false;
+                        this.showNotification(this.t('notification.refreshed'), 'success');
+                    }, 2000);
+                });
+            }
+
+            exportData() {
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                
+                btn.innerHTML = '<div class="spinner" style="width: 15px; height: 15px; margin-right: 0.5rem; display: inline-block;"></div>' + this.t('action.export');
+                btn.disabled = true;
+
+                setTimeout(() => {
+                    const exportData = {
+                        timestamp: new Date().toISOString(),
+                        weather: this.weatherData,
+                        aiModels: this.aiModels,
+                        sensorData: this.generateSensorExportData(),
+                        predictions: this.generatePredictionExportData(),
+                        systemStatus: this.getSystemStatus()
+                    };
+
+                    const blob = new Blob([JSON.stringify(exportData, null, 2)], { 
+                        type: 'application/json' 
+                    });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `thaiflood-pro-data-${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    this.showNotification(this.t('notification.exported'), 'success');
+                }, 2000);
+            }
+
+            predictFlood() {
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                
+                btn.innerHTML = '<div class="spinner" style="width: 15px; height: 15px; margin-right: 0.5rem; display: inline-block;"></div>' + this.t('action.predict');
+                btn.disabled = true;
+
+                // Simulate AI prediction process
+                setTimeout(() => {
+                    // Update AI predictions on map
+                    this.refreshAIPredictions();
+                    
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    this.showNotification(this.t('notification.predicted'), 'success');
+                    
+                    // Add new prediction alert
+                    this.addNewAlert('info', '🧠', 'AI Prediction Complete', 'New flood prediction analysis available with 96.3% confidence');
+                }, 3000);
+            }
+
+            updateWeather() {
+                const btn = event.target;
+                const spinner = document.createElement('div');
+                spinner.className = 'spinner';
+                spinner.style.width = '15px';
+                spinner.style.height = '15px';
+                
+                btn.innerHTML = '';
+                btn.appendChild(spinner);
+                btn.disabled = true;
+
+                setTimeout(() => {
+                    this.updateWeatherData();
+                    btn.innerHTML = this.t('weather.update');
+                    btn.disabled = false;
+                    this.showNotification(this.t('notification.weather_updated'), 'success');
+                }, 1500);
+            }
+
+            switchLanguage(lang) {
+                this.currentLang = lang;
+                
+                // Update active language button
+                document.querySelectorAll('.lang-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[onclick="switchLanguage('${lang}')"]`)?.classList.add('active');
+                
+                // Update all translations
+                this.updateLanguage();
+                
+                // Re-initialize charts with new language
+                if (this.charts.rainfall) {
+                    this.charts.rainfall.destroy();
+                    this.createRainfallChart();
+                }
+                if (this.charts.prediction) {
+                    this.charts.prediction.destroy();
+                    this.createPredictionChart();
+                }
+            }
+
+            toggleTheme() {
+                this.currentTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
+                this.applyTheme(this.currentTheme);
+            }
+
+            applyTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                const themeIcon = document.getElementById('themeIcon');
+                if (themeIcon) {
+                    themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+                }
+                
+                // Update map base layer if needed
+                if (this.map) {
+                    this.updateMapTheme(theme);
+                }
+            }
+
+            updateMapTheme(theme) {
+                // Remove existing base layer and add new one based on theme
+                this.map.eachLayer(layer => {
+                    if (layer._url && layer._url.includes('basemaps.cartocdn.com')) {
+                        this.map.removeLayer(layer);
+                    }
+                });
+                
+                const baseLayer = theme === 'dark' 
+                    ? L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                        attribution: '© CARTO © OpenStreetMap contributors',
+                        maxZoom: 20
+                    })
+                    : L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                        attribution: '© CARTO © OpenStreetMap contributors', 
+                        maxZoom: 20
+                    });
+                
+                baseLayer.addTo(this.map);
+            }
+
+            toggleLayer(btn, layerName) {
+                this.layers[layerName] = !this.layers[layerName];
+                btn.classList.toggle('active');
+                
+                if (this.layers[layerName]) {
+                    // Add layer
+                    switch(layerName) {
+                        case 'rainfall':
+                            this.addRainfallLayer();
+                            break;
+                        case 'waterlevel':
+                            this.addWaterLevelLayer();
+                            break;
+                        case 'risk':
+                            this.addRiskZonesLayer();
+                            break;
+                        case 'satellite':
+                            this.addSatelliteLayer();
+                            break;
+                        case 'prediction':
+                            this.addAIPredictionLayer();
+                            break;
+                    }
+                } else {
+                    // Remove layer
+                    this.removeLayer(layerName);
+                }
+                
+                this.showNotification(this.t('notification.layer_toggled'), 'info');
+            }
+
+            removeLayer(layerName) {
+                const classNames = {
+                    rainfall: 'rainfall-marker',
+                    waterlevel: 'water-level-marker',
+                    risk: 'risk-zone-marker',
+                    satellite: 'satellite-layer',
+                    prediction: 'ai-prediction-marker'
+                };
+                
+                this.map.eachLayer(layer => {
+                    if (layer.options && layer.options.className === classNames[layerName]) {
+                        this.map.removeLayer(layer);
+                    }
+                });
+            }
+
+            addSatelliteLayer() {
+                // Add satellite imagery overlay
+                const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    opacity: 0.7,
+                    attribution: 'Satellite Imagery',
+                    className: 'satellite-layer'
+                });
+                
+                satelliteLayer.addTo(this.map);
+            }
+
+            centerMap() {
+                this.map.setView([14.0583, 100.6014], 10);
+                this.showNotification(this.t('notification.map_centered'), 'info');
+            }
+
+            updateChart(chartType) {
+                if (chartType === 'rainfall' && this.charts.rainfall) {
+                    // Generate new rainfall data
+                    const newData = Array.from({length: 24}, () => Math.random() * 120 + 10);
+                    this.charts.rainfall.data.datasets[0].data = newData;
+                    this.charts.rainfall.update();
+                } else if (chartType === 'prediction' && this.charts.prediction) {
+                    // Update prediction accuracies
+                    const newAccuracies = [
+                        96.8 + (Math.random() - 0.5) * 2,
+                        94.2 + (Math.random() - 0.5) * 2,
+                        91.5 + (Math.random() - 0.5) * 2,
+                        97.3 + (Math.random() - 0.5) * 2
+                    ];
+                    this.charts.prediction.data.datasets[0].data = newAccuracies;
+                    this.charts.prediction.update();
+                }
+            }
+
+            clearAlerts() {
+                const alertsContainer = document.getElementById('liveAlerts');
+                if (alertsContainer) {
+                    alertsContainer.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                            <div style="font-size: 2rem; margin-bottom: 1rem;">📭</div>
+                            <div>${this.currentLang === 'th' ? 'ไม่มีการแจ้งเตือน' : 'No alerts'}</div>
+                        </div>
+                    `;
+                    this.showNotification(this.t('notification.alerts_cleared'), 'info');
+                }
+            }
+
+            viewAlertDetails(alertId) {
+                this.showModal(`
+                    <div class="modal-content">
+                        <div class="glass-card" style="max-width: 600px; margin: 0;">
+                            <div class="card-header">
+                                <h3 class="card-title">🚨 ${this.currentLang === 'th' ? 'รายละเอียดการแจ้งเตือน' : 'Alert Details'}</h3>
+                                <button onclick="this.closest('.modal').remove()" class="btn-secondary" style="padding: 0.5rem;">✕</button>
+                            </div>
+                            <div class="card-content">
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                                    <div style="text-align: center; padding: 1rem; background: var(--glass-bg); border-radius: 12px;">
+                                        <div style="color: var(--text-muted); font-size: 0.8rem;">Alert ID</div>
+                                        <div style="font-weight: 700; color: var(--primary-color);">${alertId}</div>
+                                    </div>
+                                    <div style="text-align: center; padding: 1rem; background: var(--glass-bg); border-radius: 12px;">
+                                        <div style="color: var(--text-muted); font-size: 0.8rem;">${this.currentLang === 'th' ? 'ความรุนแรง' : 'Severity'}</div>
+                                        <div style="font-weight: 700; color: var(--error-color);">${this.currentLang === 'th' ? 'สูง' : 'HIGH'}</div>
+                                    </div>
+                                    <div style="text-align: center; padding: 1rem; background: var(--glass-bg); border-radius: 12px;">
+                                        <div style="color: var(--text-muted); font-size: 0.8rem;">${this.currentLang === 'th' ? 'ความเชื่อมั่น AI' : 'AI Confidence'}</div>
+                                        <div style="font-weight: 700; color: var(--success-color);">94.7%</div>
+                                    </div>
+                                    <div style="text-align: center; padding: 1rem; background: var(--glass-bg); border-radius: 12px;">
+                                        <div style="color: var(--text-muted); font-size: 0.8rem;">${this.currentLang === 'th' ? 'เวลาตอบสนอง' : 'Response Time'}</div>
+                                        <div style="font-weight: 700; color: var(--info-color);">1.3min</div>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-bottom: 1rem;">
+                                    <strong>📍 ${this.currentLang === 'th' ? 'พื้นที่ได้รับผลกระทบ:' : 'Affected Areas:'}</strong>
+                                    ${this.currentLang === 'th' ? 'กรุงเทพมหานคร, ปทุมธานี, นนทบุรี' : 'Bangkok Metropolitan, Pathum Thani, Nonthaburi'}
+                                </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <strong>⏱️ ${this.currentLang === 'th' ? 'ระยะเวลาคาดการณ์:' : 'Expected Duration:'}</strong>
+                                    ${this.currentLang === 'th' ? '4-6 ชั่วโมง' : '4-6 hours'}
+                                </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <strong>🤖 ${this.currentLang === 'th' ? 'การวิเคราะห์ AI:' : 'AI Analysis:'}</strong>
+                                    ${this.currentLang === 'th' ? 'โครงข่ายประสาทเทียมตรวจพบรูปแบบวิกฤตที่บ่งชี้ถึงความน่าจะเป็นของน้ำท่วมรุนแรง' : 'Neural networks detected critical patterns indicating severe flooding probability'}
+                                </div>
+                                
+                                <div style="background: var(--glass-bg); padding: 1.5rem; border-radius: 12px; margin: 1rem 0;">
+                                    <strong>🎯 ${this.currentLang === 'th' ? 'การดำเนินการที่แนะนำ:' : 'Recommended Actions:'}</strong>
+                                    <ul style="margin: 0.5rem 0; padding-left: 1.5rem; line-height: 1.6;">
+                                        <li>${this.currentLang === 'th' ? 'อพยพไปยังพื้นที่ปลอดภัยทันที' : 'Evacuate to designated safe zones immediately'}</li>
+                                        <li>${this.currentLang === 'th' ? 'ติดตามช่องทางการสื่อสารฉุกเฉิน' : 'Monitor emergency communication channels'}</li>
+                                        <li>${this.currentLang === 'th' ? 'เตรียมอุปกรณ์ฉุกเฉินและเอกสาร' : 'Prepare emergency supplies and documents'}</li>
+                                        <li>${this.currentLang === 'th' ? 'ใช้ระบบนำทางเพื่อเส้นทางที่เหมาะสม' : 'Use navigation system for optimal routes'}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div style="padding: 1.5rem; border-top: 1px solid var(--glass-border); display: flex; gap: 1rem; justify-content: center;">
+                                <button class="btn-primary" onclick="system.acknowledgeAlert('${alertId}'); this.closest('.modal').remove();">
+                                    ✓ ${this.currentLang === 'th' ? 'รับทราบ' : 'Acknowledge'}
+                                </button>
+                                <button class="btn-secondary" onclick="system.shareAlert('${alertId}');">
+                                    📤 ${this.currentLang === 'th' ? 'แชร์' : 'Share'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            }
+
+            acknowledgeAlert(alertId) {
+                this.showNotification(this.t('notification.alert_acknowledged'), 'success');
+            }
+
+            shareAlert(alertId) {
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'ThaiFlood Pro Ultimate - Emergency Alert',
+                        text: this.currentLang === 'th' ? 
+                            'การแจ้งเตือนน้ำท่วมฉุกเฉินจากระบบ AI' : 
+                            'Emergency flood alert from AI prediction system',
+                        url: window.location.href
+                    });
+                } else {
+                    navigator.clipboard.writeText(
+                        `Emergency Alert ${alertId}: ${window.location.href}`
+                    );
+                    this.showNotification(this.t('notification.alert_shared'), 'success');
+                }
+            }
+
+            addNewAlert(type, icon, title, description) {
+                const alertsContainer = document.getElementById('liveAlerts');
+                if (!alertsContainer) return;
+
+                // Clear "no alerts" message if present
+                if (alertsContainer.innerHTML.includes('📭')) {
+                    alertsContainer.innerHTML = '';
+                }
+
+                const alertElement = document.createElement('div');
+                alertElement.className = `alert-item ${type}`;
+                
+                alertElement.innerHTML = `
+                    <div class="alert-header">
+                        <div class="alert-title">${icon} ${title}</div>
+                        <div class="alert-time">${new Date().toLocaleTimeString('th-TH')}</div>
+                    </div>
+                    <div class="alert-description">${description}</div>
+                    <div class="alert-actions">
+                        <button class="alert-btn primary" onclick="system.viewAlertDetails('${Date.now()}')">
+                            ${this.t('alert.view')}
+                        </button>
+                        <button class="alert-btn secondary" onclick="this.closest('.alert-item').remove()">
+                            ${this.currentLang === 'th' ? '✓ รับทราบ' : '✓ Dismiss'}
+                        </button>
+                    </div>
+                `;
+                
+                alertElement.style.animation = 'slideUp 0.5s ease-out';
+                alertsContainer.insertBefore(alertElement, alertsContainer.firstChild);
+                
+                // Keep only latest 10 alerts
+                while (alertsContainer.children.length > 10) {
+                    alertsContainer.removeChild(alertsContainer.lastChild);
+                }
+            }
+
+            refreshMapLayers() {
+                // Clear existing layers
+                this.map.eachLayer(layer => {
+                    if (layer.options && layer.options.className) {
+                        this.map.removeLayer(layer);
+                    }
+                });
+                
+                // Re-add active layers
+                this.initializeMapLayers();
+            }
+
+            refreshAIPredictions() {
+                // Remove existing AI prediction layers
+                this.removeLayer('prediction');
+                // Add new predictions
+                if (this.layers.prediction) {
+                    this.addAIPredictionLayer();
+                }
+            }
+
+            generateSensorExportData() {
+                return {
+                    totalSensors: 1247,
+                    activeSensors: 1198,
+                    sensorTypes: {
+                        rainfall: 456,
+                        waterLevel: 334,
+                        weather: 267,
+                        soil: 141
+                    },
+                    averageAccuracy: 96.8,
+                    lastUpdate: new Date().toISOString()
+                };
+            }
+
+            generatePredictionExportData() {
+                return {
+                    models: this.aiModels,
+                    predictions: Array.from({length: 10}, (_, i) => ({
+                        id: `PRED-${Date.now()}-${i}`,
+                        location: `${(14.0583 + (Math.random() - 0.5) * 1).toFixed(4)}, ${(100.6014 + (Math.random() - 0.5) * 1).toFixed(4)}`,
+                        probability: (Math.random() * 0.6 + 0.4).toFixed(3),
+                        horizon: Math.floor(Math.random() * 48) + 6,
+                        severity: ['Low', 'Medium', 'High', 'Critical'][Math.floor(Math.random() * 4)],
+                        timestamp: new Date().toISOString()
+                    }))
+                };
+            }
+
+            getSystemStatus() {
+                return {
+                    apiLatency: '47ms',
+                    memoryUsage: '68% (24GB)',
+                    cpuLoad: '78% (32 cores)', 
+                    uptime: '99.97%',
+                    activeConnections: 1247,
+                    processingRate: '15.7K req/sec',
+                    lastMaintenance: '2024-01-15T02:30:00Z'
+                };
+            }
+
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                
+                notification.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+                        <span>${message}</span>
+                        <button onclick="this.parentElement.parentElement.remove()" style="
+                            background: none;
+                            border: none;
+                            color: var(--text-primary);
+                            cursor: pointer;
+                            padding: 0;
+                            font-size: 1.2rem;
+                        ">✕</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.style.animation = 'slideOutRight 0.5s ease-in';
+                        setTimeout(() => notification.remove(), 500);
+                    }
+                }, 5000);
+            }
+
+            showModal(content) {
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = content;
+                
+                modal.onclick = (e) => {
+                    if (e.target === modal) modal.remove();
+                };
+                
+                document.body.appendChild(modal);
+            }
+        }
+
+        // Global functions for UI interactions
+        let system;
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Could implement tab switching logic here
+            system.showNotification(
+                `${system.currentLang === 'th' ? 'สลับไปยัง' : 'Switched to'} ${tabName.toUpperCase()} ${system.currentLang === 'th' ? 'โมดูล' : 'module'}`, 
+                'info'
+            );
+        }
+
+        function switchLanguage(lang) {
+            system.switchLanguage(lang);
+        }
+
+        function toggleTheme() {
+            system.toggleTheme();
+        }
+
+        function refreshAllData() {
+            system.refreshAllData();
+        }
+
+        function exportData() {
+            system.exportData();
+        }
+
+        function predictFlood() {
+            system.predictFlood();
+        }
+
+        function updateWeather() {
+            system.updateWeather();
+        }
+
+        function toggleLayer(btn, layerName) {
+            system.toggleLayer(btn, layerName);
+        }
+
+        function centerMap() {
+            system.centerMap();
+        }
+
+        function updateChart(chartType) {
+            system.updateChart(chartType);
+        }
+
+        function clearAlerts() {
+            system.clearAlerts();
+        }
+
+        function viewAlertDetails(alertId) {
+            system.viewAlertDetails(alertId);
+        }
+
+        function acknowledgeAlert(alertId) {
+            system.acknowledgeAlert(alertId);
+        }
+
+        function shareAlert(alertId) {
+            system.shareAlert(alertId);
+        }
+
+        // Enhanced animations CSS
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            @keyframes slideOutRight {
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // Initialize system when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            system = new ThaiFloodProUltimate();
+            console.log('🌊 ThaiFlood Pro Ultimate System Initialized');
+            console.log('🎯 Features: Professional UI, QGIS Integration, AI Analytics, Multi-language, Dark/Light Theme');
+            console.log('⌨️  Shortcuts: Ctrl+R (Refresh), Ctrl+E (Export), Ctrl+P (Predict), Ctrl+L (Language), Ctrl+T (Theme)');
+        });
+
+    </script>
+    
+</body>
+</html>
