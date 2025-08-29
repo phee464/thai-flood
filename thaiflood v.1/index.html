@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>thai flood - แอปวางแผนการเดินทาง</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="global.css">
+</head>
+<body data-lang="th">
+    <!-- Advanced Background Animation -->
+    <div class="bg-animation"></div>
+    
+    <!-- Professional Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+             
+                <div class="logo-text">
+                    <h1 data-translate="title">thai flood</h1>
+                    <div class="subtitle">
+                        <span data-translate="subtitle">แอปวางแผนการเดินทางอัจฉริยะ</span>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="nav-tabs">
+                <button class="nav-tab active" onclick="switchTab('main')" data-tab="main">
+                  
+                    <span data-translate="nav.main">เส้นทางหลัก</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('compare')" data-tab="compare">
+                  
+                    <span data-translate="nav.compare">เปรียบเทียบ</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('incidents')" data-tab="incidents">
+                   
+                    <span data-translate="nav.incidents">อุบัติเหตุ</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('weather')" data-tab="weather">
+                  
+                    <span data-translate="nav.weather">สภาพอากาศ</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('settings')" data-tab="settings">
+                 
+                    <span data-translate="nav.settings">ตั้งค่า</span>
+                </button>
+            </nav>
+            
+            <div class="status-panel">
+                <div class="lang-switcher">
+                    <button class="lang-btn active" onclick="switchLanguage('th')">TH</button>
+                    <button class="lang-btn" onclick="switchLanguage('en')">EN</button>
+                </div>
+                
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span id="themeIcon">🌙</span>
+                </button>
+                
+              
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <!-- เนื้อหาหลักของแอปจะอยู่ที่นี่ -->
+        <div style="margin-top: 120px; padding: 2rem; text-align: center;">
+            <h2>ระบบวางแผนการเดินทางอัจฉริยะ</h2>
+            <p>เลือกแท็บด้านบนเพื่อใช้งานฟีเจอร์ต่างๆ ของแอป</p>
+        </div>
+    </main>
+
+    <script>
+        // ระบบจัดการภาษา
+        const translations = {
+            th: {
+                'title': 'การเดินทาง',
+                'subtitle': 'แอปวางแผนการเดินทางอัจฉริยะ',
+                'nav.main': 'เส้นทาง',
+                'nav.compare': 'เปรียบเทียบ',
+                'nav.incidents': 'อุบัติเหตุ',
+                'nav.weather': 'สภาพอากาศ',
+                'nav.settings': 'แผนที่',
+             
+            },
+            en: {
+                'title': 'thai flood',
+                'subtitle': 'Smart Travel Planning App',
+                'nav.main': 'Main Route',
+                'nav.compare': 'Compare',
+                'nav.incidents': 'Incidents',
+                'nav.weather': 'Weather',
+                'nav.settings': 'QGIS',
+       
+            }
+        };
+
+        let currentLang = 'th';
+        let currentTheme = 'dark';
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // เปลี่ยนเนื้อหาตามแท็บที่เลือก
+            // (ในที่นี้เป็นตัวอย่างเท่านั้น)
+            console.log(`เปลี่ยนไปยังแท็บ: ${tabName}`);
+        }
+
+        function switchLanguage(lang) {
+            currentLang = lang;
+            document.body.setAttribute('data-lang', lang);
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                element.textContent = translations[lang][key];
+            });
+            
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[onclick="switchLanguage('${lang}')"]`).classList.add('active');
+        }
+
+        function toggleTheme() {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            document.getElementById('themeIcon').textContent = currentTheme === 'dark' ? '🌙' : '☀️';
+        }
+
+        // เริ่มต้นภาษาไทย
+        switchLanguage('th');
+    </script>
+</body>
+</html>
